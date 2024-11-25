@@ -1,0 +1,204 @@
+[
+  {
+    "title": "What is a Camera Matrix?",
+    "content": [
+      {
+        "type": "text",
+        "data": "The camera matrix is one of the most important concepts in computer vision. It defines the relationship between the 3D world and an image of that world made by an idealised camera."
+      }
+    ]
+  },
+  {
+    "title": "The Camera Projection Equation",
+    "content": [
+      {
+        "type": "text",
+        "data": "The camera projection equation, or pinhole camera equation, is the transformation which maps 3D points to the 2D image plane. It is a linear transformation, with 3D points transformed by the 3x4 camera matrix."
+      },
+      {
+        "type": "eqn",
+        "url": "/camera_matrix/equations/eqn1.png"
+      },
+      {
+        "type": "text",
+        "data": "Where x is the 3D point, y is the 2D point, and P is the camera matrix."
+      },
+      {
+        "type": "text",
+        "data": "The equation is itself a product of two components, the intrinsic matrix K, and the extrinsic matrix [R|T]."
+      },
+      {
+        "type": "eqn",
+        "url": "/camera_matrix/equations/eqn2.png"
+      },
+      {
+        "type": "text",
+        "data": "Let's look more closely at the extrinsic matrix, [R|T]."
+      }
+    ]
+  },
+  {
+    "title": "Extrinsics: World to Camera",
+    "content": [
+      {
+        "type": "text",
+        "data": "One way to think about the extrinsic matrix is that we wish to know where points are in a coordinate system centred on the camera, rather than the world origin. This requires a transformation from world to camera coordinates."
+      },
+      {
+        "type": "text",
+        "data": "There are two components to the transformation of points from a world coordinate system to a camera coordinate system: rotation and translation."
+      }
+    ]
+  },
+  {
+    "title": "Extrinsics: Translation",
+    "content": [
+      {
+        "type": "text",
+        "data": "Crucially, here we need to think about the location of points now in the coordinate system of the camera."
+      },
+      {
+        "type": "text",
+        "data": "Suppose that we have a point in the world, pᵥᵥ, and we wish to know where it is in the camera coordinate system. We can find the vector connecting the camera c and the point p by finding the vector connecting the world origin, o, and the camera c, and adding to it the vector connecting the world origin and the point p."
+      },
+      {
+        "type": "eqn",
+        "url": "/camera_matrix/equations/eqn3.png"
+      },
+      {
+        "type": "text",
+        "data": "The first component of this, the vector connecting the origin to the camera, is the first component of the extrinsic matrix [R|T]. This is the translation vector, T."
+      }
+    ]
+  },
+  {
+    "title": "Extrinsics: Rotation",
+    "content": [
+      {
+        "type": "text",
+        "data": "So now we have the location of the point, p, in the camera coordinate system. We just add our translation vector, T, to the location of our point p, right?"
+      },
+      {
+        "type": "text",
+        "data": "Not so fast. Recall that we are working in the camera coordinate system. The location of p is given in world coordinates. We still need to rotate the point into the camera coordinate system. However, this is fairly simple. We simply find the rotation matrix R which rotates points from the world coordinate system to the camera system."
+      },
+      {
+        "type": "text",
+        "data": "Practically speaking, this is given by the orientation of the world axes when viewed in the camera coordinate system. If you could measure the vectors of the world axes x, y, and z in the camera coordinate system, you would form this rotation matrix with these vectors as columns."
+      }
+    ]
+  },
+  {
+    "title": "Extrinsics: Forming the Matrix",
+    "content": [
+      {
+        "type": "text",
+        "data": "Now we have all the pieces we need. To find the location of a point in the camera coordinate system, we rotate a given point with a rotation matrix R, and then translate it with the translation vector T:"
+      },
+      {
+        "type": "eqn",
+        "url": "/camera_matrix/equations/eqn4.png"
+      },
+      {
+        "type": "text",
+        "data": "We can write this more compactly via the extrinsic matrix [R|T]:"
+      },
+      {
+        "type": "eqn",
+        "url": "/camera_matrix/equations/eqn5.png",
+        "hgt": "2.7rem"
+      },
+      {
+        "type": "text",
+        "data": "Where the tilde over the point p indicates that it is in homogeneous coordinates (we have appended a 1 to the end of the vector). You can verify that this is the same as applying the rotation and translation separately."
+      }
+    ]
+  },
+  {
+    "title": "Extrinsics: Practical Considerations",
+    "content": [
+      {
+        "type": "text",
+        "data": "It sounds good to say we find the translation of the world origin in the camera coordinate system and the rotation of the world axes in the same system. However, in reality we typically set the location and rotation of the camera in the world coordinate system, not the other way around."
+      },
+      {
+        "type": "text",
+        "data": "Fortunately, the two matrices are separated by a simple inverse operation. Given the location and rotation of the camera in the world coordinate system, the extrinsic matrix is the simple inverse of the matrix formed by the concatenation of these matrices."
+      }
+    ]
+  },
+  {
+    "title": "Extrinsics: Sandbox",
+    "content": [
+      {
+        "type": "text",
+        "data": "Try adjusting the camera rotation and translation to see how the extrinsics change."
+      }
+    ]
+  },
+  {
+    "title": "Intrinsics",
+    "content": [
+      {
+        "type": "text",
+        "data": "The intrinsic matrix, K, is the second half of the camera matrix. We now have the location of any given point in the camera coordinate system. Now we need to project this point onto the image plane."
+      },
+      {
+        "type": "text",
+        "data": "There are two main components to the intrinsic matrix: the focal length, f, and the principal point, c."
+      }
+    ]
+  },
+  {
+    "title": "Intrinsics: Focal Length",
+    "content": [
+      {
+        "type": "text",
+        "data": "The focal length is defined as the distance from the camera to the image plane. It is scalar, and typically the same for x and y."
+      },
+      {
+        "type": "text",
+        "data": "A more intuitive way to think about the focal length of the camera is that it defines the field of view of the camera. If the focal length is large, then a smaller solid angle is captured on the image plane, resulting in a smaller field of view."
+      }
+    ]
+  },
+  {
+    "title": "Intrinsics: Camera Center",
+    "content": [
+      {
+        "type": "text",
+        "data": "The camera center is the (2D) point in the image plane which is the image of the camera origin itself. It is the point where the optical axis of the camera intersects the image plane."
+      },
+      {
+        "type": "text",
+        "data": "If we move the camera center to the left, points will appear to move to the right on the image plane. Similarly, if we move the camera center up, points will appear to move down on the image plane."
+      }
+    ]
+  },
+  {
+    "title": "Intrinsics: Putting it Together",
+    "content": [
+      {
+        "type": "text",
+        "data": "Mathematically, the intrinsic matrix is given by:"
+      },
+      {
+        "type": "eqn",
+        "url": "/camera_matrix/equations/eqn6.png"
+      },
+      {
+        "type": "text",
+        "data": "Where f is the focal length, and cₓ and cᵧ are the principal points in x and y. This gives us more intuition about how f works. If we increase f, points will spread further from the center of the image plane, less information will fit on the image, and so the field of view will decrease."
+      }
+    ]
+  },
+  {
+    "title": "Intrinsics: Putting it Together",
+    "content": [
+      {
+        "type": "text",
+        "data": "Not so intuitive is the impact of the principal point, c."
+      }
+    ]
+  }
+]
