@@ -3,7 +3,6 @@ import { Canvas } from "@react-three/fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import Cube from "./three_js/Cube";
 import Axes from "./three_js/Axes";
-import init_vals from "./animation_scripts/init_vals.json";
 import Grid from "./three_js/Grid";
 import {
   get_cam_extrinsics,
@@ -12,6 +11,9 @@ import {
 import page_data from "./pages/page_data.json";
 import Camera from "./three_js/Camera";
 import { get_axis_visibility } from "./animation_scripts/visibility";
+import ParamSlider from "./ParamSlider";
+import CubeCorner from "./three_js/CubeCorner";
+import DecomposedConnection from "./three_js/DecomposedConnection";
 
 const WhatIsACameraMatrix = () => {
   const [egoExtrinsics, setEgoExtrinsics] = useState<number[][]>(
@@ -22,15 +24,21 @@ const WhatIsACameraMatrix = () => {
     get_cam_extrinsics(0)
   );
 
-  const [focalX, setFocalX] = useState(1920);
-  const [focalY, setFocalY] = useState(1920);
-  const [s, setS] = useState(0);
-  const [cx, setCx] = useState(0);
-  const [cy, setCy] = useState(0);
+  const [egoFocalX, setEgoFocalX] = useState(1920);
+  const [egoFocalY, setEgoFocalY] = useState(1920);
+  const [egoS, setEgoS] = useState(0);
+  const [egoCx, setEgoCx] = useState(0);
+  const [egoCy, setEgoCy] = useState(0);
+
+  const [camFocalX, setCamFocalX] = useState(1920);
+  const [camFocalY, setCamFocalY] = useState(1920);
+  const [camS, setCamS] = useState(0);
+  const [camCx, setCamCx] = useState(0);
+  const [camCy, setCamCy] = useState(0);
 
   const [egoIntrinsics, setEgoIntrinsics] = useState<number[][]>([
-    [1920, 0, 960],
-    [0, 1920, 720],
+    [1920, 0, 0],
+    [0, 1920, 0],
     [0, 0, 1],
   ]);
 
@@ -42,11 +50,19 @@ const WhatIsACameraMatrix = () => {
 
   useEffect(() => {
     setEgoIntrinsics([
-      [focalX, s, cx],
-      [0, focalY, cy],
+      [egoFocalX, egoS, egoCx],
+      [0, egoFocalY, egoCy],
       [0, 0, 1],
     ]);
-  }, [focalX, focalY, s, cx, cy]);
+  }, [egoFocalX, egoFocalY, egoS, egoCx, egoCy]);
+
+  useEffect(() => {
+    setCamIntrinsics([
+      [camFocalX, camS, camCx],
+      [0, camFocalY, camCy],
+      [0, 0, 1],
+    ]);
+  }, [camFocalX, camFocalY, camS, camCx, camCy]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -86,6 +102,31 @@ const WhatIsACameraMatrix = () => {
       }
     };
   }, []);
+
+  // create dictionary for accessing slider values
+  const slider_dict: {
+    [key: string]: [
+      number,
+      React.Dispatch<React.SetStateAction<number>>,
+      number,
+      number
+    ];
+  } = {
+    fx: [camFocalX, setCamFocalX, 500, 3000],
+    fy: [camFocalY, setCamFocalY, 500, 3000],
+    s: [camS, setCamS, -100, 100],
+    cx: [camCx, setCamCx, -250, 250],
+    cy: [camCy, setCamCy, -250, 250],
+    f: [
+      camFocalX,
+      (x) => {
+        setCamFocalX(x);
+        setCamFocalY(x);
+      },
+      500,
+      3000,
+    ],
+  };
 
   return (
     <div
@@ -128,6 +169,8 @@ const WhatIsACameraMatrix = () => {
             egoEtrinsicMatrix={egoExtrinsics}
             egoIntrinsicMatrix={egoIntrinsics}
             camExtrinsicMatrix={camExtrinsics}
+            camIntrinsicMatrix={camIntrinsics}
+            showPlane={false}
           />
           {axisVisibility && (
             <>
@@ -145,13 +188,30 @@ const WhatIsACameraMatrix = () => {
               />
             </>
           )}
+          {/* <CubeCorner
+            egoExtrinsicMatrix={egoExtrinsics}
+            egoIntrinsicMatrix={egoIntrinsics}
+            cameraExtrinsics={camExtrinsics}
+            cameraIntrinsics={camIntrinsics}
+            showCamPoint={true}
+            showCubePoint={true}
+            showLine={true}
+            showImagePlaneIntersection={true}
+          /> */}
+          <DecomposedConnection
+            egoEtrinsicMatrix={egoExtrinsics}
+            egoIntrinsicMatrix={egoIntrinsics}
+            camExtrinsicMatrix={camExtrinsics}
+            camIntrinsicMatrix={camIntrinsics}
+            camCoords={true}
+          />
         </Canvas>
       </div>
       <div
         ref={scrollableRef}
         className="relative overflow-y-scroll h-full w-full"
       >
-        {page_data.map((page, idx) => {
+        {page_data.map((page: any, idx: number) => {
           return (
             <div
               className="h-[100vh] w-[24rem] pl-[1rem] flex items-center justify-center"
@@ -159,7 +219,7 @@ const WhatIsACameraMatrix = () => {
             >
               <div className="bg-[#fff] rounded-md p-4 text-black h-fit">
                 <h2 className="text-2xl font-bold mb">{page.title}</h2>
-                {page.content.map((content, index) => {
+                {page.content.map((content: any, index: number) => {
                   return content.type === "text" ? (
                     <p className="mt-2" key={index}>
                       {content.data}
@@ -175,8 +235,19 @@ const WhatIsACameraMatrix = () => {
                         style={{ height: content.hgt ? content.hgt : "1rem" }}
                       />
                     </div>
+                  ) : content.type === "slider" ? (
+                    <ParamSlider
+                      value={slider_dict[content.title][0]}
+                      min={slider_dict[content.title][2]}
+                      max={slider_dict[content.title][3]}
+                      title={content.title}
+                      onChange={(x) =>
+                        slider_dict[content.title][1](x as number)
+                      }
+                    />
                   ) : null;
                 })}
+
                 <h3 className="font-bold mt-2">Scroll for more</h3>
               </div>
             </div>
@@ -206,6 +277,15 @@ const WhatIsACameraMatrix = () => {
             extrinsicMatrix={camExtrinsics}
             intrinsicMatrix={camIntrinsics}
           />
+          {/* <CubeCorner
+            egoExtrinsicMatrix={camExtrinsics}
+            egoIntrinsicMatrix={camIntrinsics}
+            cameraExtrinsics={camExtrinsics}
+            cameraIntrinsics={camIntrinsics}
+            showCamPoint={false}
+            showCubePoint={true}
+            showLine={false}
+          /> */}
         </Canvas>
       </div>
     </div>

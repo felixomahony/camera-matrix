@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { Line } from "@react-three/drei";
 
 export default function LineComponent({
   startX,

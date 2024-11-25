@@ -159,6 +159,10 @@
       {
         "type": "text",
         "data": "A more intuitive way to think about the focal length of the camera is that it defines the field of view of the camera. If the focal length is large, then a smaller solid angle is captured on the image plane, resulting in a smaller field of view."
+      },
+      {
+        "type": "slider",
+        "title": "f"
       }
     ]
   },
@@ -172,6 +176,14 @@
       {
         "type": "text",
         "data": "If we move the camera center to the left, points will appear to move to the right on the image plane. Similarly, if we move the camera center up, points will appear to move down on the image plane."
+      },
+      {
+        "type": "slider",
+        "title": "cx"
+      },
+      {
+        "type": "slider",
+        "title": "cy"
       }
     ]
   },

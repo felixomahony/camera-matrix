@@ -1,23 +1,37 @@
 import { projectPoints, rotateCamera } from "../../../scripts/rotation";
 import { useEffect, useState } from "react";
 import Line from "./Line";
-
-const camWorld = [
-  [-1, 1, 1, -1, 0],
-  [0.5, 0.5, -0.5, -0.5, 0],
-  [-2, -2, -2, -2, 0],
-  [1, 1, 1, 1, 1],
-];
+import Quadrelateral from "./Quadrelateral";
 
 export default function Camera({
   egoEtrinsicMatrix,
   egoIntrinsicMatrix,
   camExtrinsicMatrix,
+  camIntrinsicMatrix,
+  showPlane = false,
 }: {
   egoEtrinsicMatrix: number[][];
   egoIntrinsicMatrix: number[][];
   camExtrinsicMatrix: number[][];
+  camIntrinsicMatrix: number[][];
+  showPlane?: boolean;
 }) {
+  const getCamWorld = (intrinsics: number[][]) => {
+    const focalX = intrinsics[0][0];
+    // const focalY = intrinsics[1][1];
+    const cx = intrinsics[0][2] / 1000;
+    const cy = intrinsics[1][2] / 1000;
+
+    return [
+      [-0.96 - cx, 0.96 - cx, 0.96 - cx, -0.96 - cx, 0],
+      [0.72 - cy, 0.72 - cy, -0.72 - cy, -0.72 - cy, 0],
+      [-focalX / 1000, -focalX / 1000, -focalX / 1000, -focalX / 1000, 0],
+      [1, 1, 1, 1, 1],
+    ];
+  };
+
+  const [camWorld, setCamWorld] = useState(getCamWorld(camIntrinsicMatrix));
+
   const [camCam, setCamCam] = useState<number[][]>(
     rotateCamera(camExtrinsicMatrix, camWorld)
   );
@@ -32,12 +46,16 @@ export default function Camera({
 
   useEffect(() => {
     setCamEgo(projectPoints(camCam, egoEtrinsicMatrix, egoIntrinsicMatrix));
-  }, [egoEtrinsicMatrix, egoIntrinsicMatrix]);
+  }, [egoEtrinsicMatrix, egoIntrinsicMatrix, camWorld]);
 
   useEffect(() => {
     const cC = rotateCamera(camExtrinsicMatrix, camWorld);
     setCamCam(cC);
-  }, [camExtrinsicMatrix]);
+  }, [camExtrinsicMatrix, camWorld]);
+
+  useEffect(() => {
+    setCamWorld(getCamWorld(camIntrinsicMatrix));
+  }, [camIntrinsicMatrix]);
 
   console.log("camEgo", camEgo);
 
@@ -104,6 +122,13 @@ export default function Camera({
         endY={camEgo[1][4]}
         color="#fff"
       />
+      {showPlane && (
+        <Quadrelateral
+          projectedVerts={camEgo}
+          idxes={[0, 1, 2, 3]}
+          color="#99f6e4"
+        />
+      )}
     </>
   );
 }

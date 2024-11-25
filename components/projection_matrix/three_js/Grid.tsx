@@ -9,7 +9,7 @@ const gridIdxes: number[] = [
 const gridIdxesHorizontalStart = [
   gridIdxes,
   gridIdxes.map((_, __) => -10),
-  gridIdxes.map((_, __) => -1),
+  gridIdxes.map((_, __) => 0),
   gridIdxes.map((_, __) => 1),
 ];
 
@@ -18,7 +18,7 @@ const gridIdxesHorizontalStart = [
 const gridIdxesHorizontalEnd = [
   gridIdxes,
   gridIdxes.map((_, i) => 10),
-  gridIdxes.map((_, i) => -1),
+  gridIdxes.map((_, i) => 0),
   gridIdxes.map((_, i) => 1),
 ];
 
@@ -27,7 +27,7 @@ const gridIdxesHorizontalEnd = [
 const gridIdxesVerticalStart = [
   gridIdxes.map((_, i) => -10),
   gridIdxes,
-  gridIdxes.map((_, i) => -1),
+  gridIdxes.map((_, i) => 0),
   gridIdxes.map((_, i) => 1),
 ];
 
@@ -36,7 +36,7 @@ const gridIdxesVerticalStart = [
 const gridIdxesVerticalEnd = [
   gridIdxes.map((_, i) => 10),
   gridIdxes,
-  gridIdxes.map((_, i) => -1),
+  gridIdxes.map((_, i) => 0),
   gridIdxes.map((_, i) => 1),
 ];
 
