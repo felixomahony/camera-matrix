@@ -7,7 +7,7 @@ import Grid from "./three_js/Grid";
 import { get_ego_extrinsics } from "./animation_scripts/extrinsics";
 import page_data from "./pages/page_data.json";
 import Camera from "./three_js/Camera";
-import { get_axis_visibility } from "./animation_scripts/visibility";
+import { get_visibility } from "./animation_scripts/visibility";
 import ParamSlider from "./ParamSlider";
 import CubeCorner from "./three_js/CubeCorner";
 import DecomposedConnection from "./three_js/DecomposedConnection";
@@ -18,8 +18,7 @@ import {
   invertEuler,
   invertTranslation,
 } from "../../scripts/rotation";
-import { inv } from "mathjs";
-import * as THREE from "three";
+import Markdown from "react-markdown";
 
 const egoIntrinsics = [
   [1920, 0, 0],
@@ -103,16 +102,14 @@ const WhatIsACameraMatrix = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollableRef = useRef<HTMLDivElement>(null); // Reference to the scrollable content
 
-  const [axisVisibility, setAxisVisibility] = useState<boolean>(
-    get_axis_visibility(0)
-  );
+  const [visibility, setVisibility] = useState<any>(get_visibility(0));
 
   const calculateScrollPercentage = () => {
     if (scrollableRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollableRef.current;
       const percentage = (scrollTop / clientHeight) * 100;
       setEgoExtrinsics(get_ego_extrinsics(percentage));
-      setAxisVisibility(get_axis_visibility(percentage));
+      setVisibility(get_visibility(percentage));
     }
   };
 
@@ -312,54 +309,70 @@ const WhatIsACameraMatrix = () => {
           <Grid
             extrinsicMatrix={egoExtrinsics}
             intrinsicMatrix={egoIntrinsics}
-            camCoords={false}
+            camCoords={visibility.grid_cam}
             camExtrinsicMatrix={camExtrinsics}
           />
           <Cube
             extrinsicMatrix={egoExtrinsics}
             intrinsicMatrix={egoIntrinsics}
           />
-          <Camera
-            egoEtrinsicMatrix={egoExtrinsics}
-            egoIntrinsicMatrix={egoIntrinsics}
-            camExtrinsicMatrix={camExtrinsics}
-            camIntrinsicMatrix={camIntrinsics}
-            showPlane={false}
-          />
-          {axisVisibility && (
-            <>
-              <Axes
-                egoExtrinsicMatrix={egoExtrinsics}
-                egoIntrinsicMatrix={egoIntrinsics}
-                cameraExtrinsics={camExtrinsics}
-                camera={false}
-              />
-              <Axes
-                egoExtrinsicMatrix={egoExtrinsics}
-                egoIntrinsicMatrix={egoIntrinsics}
-                cameraExtrinsics={camExtrinsics}
-                camera={true}
-              />
-            </>
+          {visibility.camera && (
+            <Camera
+              egoEtrinsicMatrix={egoExtrinsics}
+              egoIntrinsicMatrix={egoIntrinsics}
+              camExtrinsicMatrix={camExtrinsics}
+              camIntrinsicMatrix={camIntrinsics}
+              showPlane={visibility.camera_plane}
+            />
           )}
-          {/* <CubeCorner
-            egoExtrinsicMatrix={egoExtrinsics}
-            egoIntrinsicMatrix={egoIntrinsics}
-            cameraExtrinsics={camExtrinsics}
-            cameraIntrinsics={camIntrinsics}
-            showCamPoint={true}
-            showCubePoint={true}
-            showLine={true}
-            showImagePlaneIntersection={true}
-          /> */}
-          <DecomposedConnection
-            egoEtrinsicMatrix={egoExtrinsics}
-            egoIntrinsicMatrix={egoIntrinsics}
-            camExtrinsicMatrix={camExtrinsics}
-            camIntrinsicMatrix={camIntrinsics}
-            camCoords={true}
-            ord={"y"}
-          />
+          {visibility.axis_cam && (
+            <Axes
+              egoExtrinsicMatrix={egoExtrinsics}
+              egoIntrinsicMatrix={egoIntrinsics}
+              cameraExtrinsics={camExtrinsics}
+              camera={true}
+            />
+          )}
+          {visibility.axis_orig && (
+            <Axes
+              egoExtrinsicMatrix={egoExtrinsics}
+              egoIntrinsicMatrix={egoIntrinsics}
+              cameraExtrinsics={camExtrinsics}
+              camera={false}
+            />
+          )}
+          {visibility.cube_corner && (
+            <CubeCorner
+              egoExtrinsicMatrix={egoExtrinsics}
+              egoIntrinsicMatrix={egoIntrinsics}
+              cameraExtrinsics={camExtrinsics}
+              cameraIntrinsics={camIntrinsics}
+              showCamPoint={true}
+              showCubePoint={true}
+              showLine={true}
+              showImagePlaneIntersection={true}
+            />
+          )}
+          {visibility.decomposed_cam && (
+            <DecomposedConnection
+              egoEtrinsicMatrix={egoExtrinsics}
+              egoIntrinsicMatrix={egoIntrinsics}
+              camExtrinsicMatrix={camExtrinsics}
+              camIntrinsicMatrix={camIntrinsics}
+              camCoords={true}
+              ord={"y"}
+            />
+          )}
+          {visibility.decomposed_orig && (
+            <DecomposedConnection
+              egoEtrinsicMatrix={egoExtrinsics}
+              egoIntrinsicMatrix={egoIntrinsics}
+              camExtrinsicMatrix={camExtrinsics}
+              camIntrinsicMatrix={camIntrinsics}
+              camCoords={false}
+              ord={"y"}
+            />
+          )}
         </Canvas>
       </div>
       <div
@@ -431,7 +444,12 @@ const WhatIsACameraMatrix = () => {
         <div className="h-[100vh] w-[24rem] relative">
           <div className="absolute bottom-[1rem] left-[1rem] bg-[#fff] rounded-md p-4 text-black">
             <h2 className="text-2xl font-bold mb-2">Thanks for scrolling!</h2>
-            You've reached the end of the content.
+            Hopefully you've learned something about the camera matrix. If you
+            enjoyed this, check out my other work at{" "}
+            <a className="text-blue-500" href="https://felixomahony.github.io/">
+              felixomahony.github.io
+            </a>
+            .
           </div>
         </div>
       </div>
@@ -452,15 +470,17 @@ const WhatIsACameraMatrix = () => {
             extrinsicMatrix={camExtrinsics}
             intrinsicMatrix={camIntrinsics}
           />
-          {/* <CubeCorner
-            egoExtrinsicMatrix={camExtrinsics}
-            egoIntrinsicMatrix={camIntrinsics}
-            cameraExtrinsics={camExtrinsics}
-            cameraIntrinsics={camIntrinsics}
-            showCamPoint={false}
-            showCubePoint={true}
-            showLine={false}
-          /> */}
+          {visibility.cube_corner && (
+            <CubeCorner
+              egoExtrinsicMatrix={camExtrinsics}
+              egoIntrinsicMatrix={camIntrinsics}
+              cameraExtrinsics={camExtrinsics}
+              cameraIntrinsics={camIntrinsics}
+              showCamPoint={false}
+              showCubePoint={true}
+              showLine={false}
+            />
+          )}
         </Canvas>
       </div>
     </div>

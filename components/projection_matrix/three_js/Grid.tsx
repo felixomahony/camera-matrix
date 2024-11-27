@@ -3,46 +3,6 @@ import { useEffect, useState } from "react";
 import Line from "./Line";
 import { rotateCamera } from "../../../scripts/rotation";
 
-const gridIdxes: number[] = [
-  -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-];
-
-const gridIdxesHorizontalStart = [
-  gridIdxes,
-  gridIdxes.map((_, __) => -10),
-  gridIdxes.map((_, __) => 0),
-  gridIdxes.map((_, __) => 1),
-];
-
-// const gridIdxesHorizontalStart = [[1], [-1], [-1], [1]];
-
-const gridIdxesHorizontalEnd = [
-  gridIdxes,
-  gridIdxes.map((_, i) => 10),
-  gridIdxes.map((_, i) => 0),
-  gridIdxes.map((_, i) => 1),
-];
-
-// const gridIdxesHorizontalEnd = [[1], [1], [-1], [1]];
-
-const gridIdxesVerticalStart = [
-  gridIdxes.map((_, i) => -10),
-  gridIdxes,
-  gridIdxes.map((_, i) => 0),
-  gridIdxes.map((_, i) => 1),
-];
-
-// const gridIdxesVerticalStart = [[-10], [0], [-1], [1]];
-
-const gridIdxesVerticalEnd = [
-  gridIdxes.map((_, i) => 10),
-  gridIdxes,
-  gridIdxes.map((_, i) => 0),
-  gridIdxes.map((_, i) => 1),
-];
-
-const gridColor = "#064e3b";
-
 // const gridIdxesVerticalEnd = [[10], [0], [-1], [1]];
 
 export default function Cube({
@@ -56,6 +16,46 @@ export default function Cube({
   camCoords?: boolean;
   camExtrinsicMatrix?: number[][];
 }) {
+  const gridIdxes: number[] = [
+    -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+  ];
+
+  const gridIdxesHorizontalStart = [
+    gridIdxes,
+    gridIdxes.map((_, __) => -10),
+    gridIdxes.map((_, __) => 0),
+    gridIdxes.map((_, __) => 1),
+  ];
+
+  // const gridIdxesHorizontalStart = [[1], [-1], [-1], [1]];
+
+  const gridIdxesHorizontalEnd = [
+    gridIdxes,
+    gridIdxes.map((_, i) => 10),
+    gridIdxes.map((_, i) => 0),
+    gridIdxes.map((_, i) => 1),
+  ];
+
+  // const gridIdxesHorizontalEnd = [[1], [1], [-1], [1]];
+
+  const gridIdxesVerticalStart = [
+    gridIdxes.map((_, i) => -10),
+    gridIdxes,
+    gridIdxes.map((_, i) => 0),
+    gridIdxes.map((_, i) => 1),
+  ];
+
+  // const gridIdxesVerticalStart = [[-10], [0], [-1], [1]];
+
+  const gridIdxesVerticalEnd = [
+    gridIdxes.map((_, i) => 10),
+    gridIdxes,
+    gridIdxes.map((_, i) => 0),
+    gridIdxes.map((_, i) => 1),
+  ];
+
+  const gridColor = "#064e3b";
+
   let gridIdxesHorizontalStart_ = gridIdxesHorizontalStart;
   let gridIdxesHorizontalEnd_ = gridIdxesHorizontalEnd;
   let gridIdxesVerticalStart_ = gridIdxesVerticalStart;
@@ -106,7 +106,7 @@ export default function Cube({
     setProjGVE(
       projectPoints(gridIdxesVerticalEnd_, extrinsicMatrix, intrinsicMatrix)
     );
-  }, [extrinsicMatrix, intrinsicMatrix]);
+  }, [extrinsicMatrix, intrinsicMatrix, camExtrinsicMatrix]);
 
   if (!projGHS || projGHS.length < 3 || projGHS[0].length < 2) {
     return null;
