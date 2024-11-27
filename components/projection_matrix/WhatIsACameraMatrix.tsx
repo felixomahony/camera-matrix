@@ -4,31 +4,67 @@ import { OrthographicCamera } from "@react-three/drei";
 import Cube from "./three_js/Cube";
 import Axes from "./three_js/Axes";
 import Grid from "./three_js/Grid";
-import {
-  get_cam_extrinsics,
-  get_ego_extrinsics,
-} from "./animation_scripts/extrinsics";
+import { get_ego_extrinsics } from "./animation_scripts/extrinsics";
 import page_data from "./pages/page_data.json";
 import Camera from "./three_js/Camera";
 import { get_axis_visibility } from "./animation_scripts/visibility";
 import ParamSlider from "./ParamSlider";
 import CubeCorner from "./three_js/CubeCorner";
 import DecomposedConnection from "./three_js/DecomposedConnection";
+import init_vals from "./animation_scripts/init_vals.json";
+import {
+  toExtrinsics,
+  getT,
+  invertEuler,
+  invertTranslation,
+} from "../../scripts/rotation";
+import { inv } from "mathjs";
+import * as THREE from "three";
+
+const egoIntrinsics = [
+  [1920, 0, 0],
+  [0, 1920, 0],
+  [0, 0, 1],
+];
 
 const WhatIsACameraMatrix = () => {
+  const [camEuler, setCamEuler] = useState<number[]>(init_vals.init_cam_euler);
+  const [camPosition, setCamPosition] = useState<number[]>(
+    init_vals.init_cam_position
+  );
+  const [camExtrinsics, setCamExtrinsics] = useState<number[][]>(
+    toExtrinsics(
+      camEuler[0],
+      camEuler[1],
+      camEuler[2],
+      camPosition[0],
+      camPosition[1],
+      camPosition[2]
+    )
+  );
+
   const [egoExtrinsics, setEgoExtrinsics] = useState<number[][]>(
     get_ego_extrinsics(0)
   );
 
-  const [camExtrinsics, setCamExtrinsics] = useState<number[][]>(
-    get_cam_extrinsics(0)
-  );
+  useEffect(() => {
+    setCamExtrinsics(
+      toExtrinsics(
+        camEuler[0],
+        camEuler[1],
+        camEuler[2],
+        camPosition[0],
+        camPosition[1],
+        camPosition[2]
+      )
+    );
+  }, [camEuler, camPosition]);
 
-  const [egoFocalX, setEgoFocalX] = useState(1920);
-  const [egoFocalY, setEgoFocalY] = useState(1920);
-  const [egoS, setEgoS] = useState(0);
-  const [egoCx, setEgoCx] = useState(0);
-  const [egoCy, setEgoCy] = useState(0);
+  // const [egoFocalX, setEgoFocalX] = useState(1920);
+  // const [egoFocalY, setEgoFocalY] = useState(1920);
+  // const [egoS, setEgoS] = useState(0);
+  // const [egoCx, setEgoCx] = useState(0);
+  // const [egoCy, setEgoCy] = useState(0);
 
   const [camFocalX, setCamFocalX] = useState(1920);
   const [camFocalY, setCamFocalY] = useState(1920);
@@ -36,11 +72,11 @@ const WhatIsACameraMatrix = () => {
   const [camCx, setCamCx] = useState(0);
   const [camCy, setCamCy] = useState(0);
 
-  const [egoIntrinsics, setEgoIntrinsics] = useState<number[][]>([
-    [1920, 0, 0],
-    [0, 1920, 0],
-    [0, 0, 1],
-  ]);
+  // const [egoIntrinsics, setEgoIntrinsics] = useState<number[][]>([
+  //   [1920, 0, 0],
+  //   [0, 1920, 0],
+  //   [0, 0, 1],
+  // ]);
 
   const [camIntrinsics, setCamIntrinsics] = useState<number[][]>([
     [1920, 0, 0],
@@ -48,13 +84,13 @@ const WhatIsACameraMatrix = () => {
     [0, 0, 1],
   ]);
 
-  useEffect(() => {
-    setEgoIntrinsics([
-      [egoFocalX, egoS, egoCx],
-      [0, egoFocalY, egoCy],
-      [0, 0, 1],
-    ]);
-  }, [egoFocalX, egoFocalY, egoS, egoCx, egoCy]);
+  // useEffect(() => {
+  //   setEgoIntrinsics([
+  //     [egoFocalX, egoS, egoCx],
+  //     [0, egoFocalY, egoCy],
+  //     [0, 0, 1],
+  //   ]);
+  // }, [egoFocalX, egoFocalY, egoS, egoCx, egoCy]);
 
   useEffect(() => {
     setCamIntrinsics([
@@ -65,8 +101,6 @@ const WhatIsACameraMatrix = () => {
   }, [camFocalX, camFocalY, camS, camCx, camCy]);
 
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const [scrollPercent, setScrollPercent] = useState(0);
   const scrollableRef = useRef<HTMLDivElement>(null); // Reference to the scrollable content
 
   const [axisVisibility, setAxisVisibility] = useState<boolean>(
@@ -77,9 +111,7 @@ const WhatIsACameraMatrix = () => {
     if (scrollableRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollableRef.current;
       const percentage = (scrollTop / clientHeight) * 100;
-      setScrollPercent(percentage);
       setEgoExtrinsics(get_ego_extrinsics(percentage));
-      setCamExtrinsics(get_cam_extrinsics(percentage));
       setAxisVisibility(get_axis_visibility(percentage));
     }
   };
@@ -126,6 +158,126 @@ const WhatIsACameraMatrix = () => {
       500,
       3000,
     ],
+    Tcx: [
+      camPosition[0],
+      (x) => setCamPosition([x, camPosition[1], camPosition[2], 1] as any),
+      2,
+      12,
+    ],
+    Tcy: [
+      camPosition[1],
+      (x) => setCamPosition([camPosition[0], x, camPosition[2], 1] as any),
+      -12,
+      -2,
+    ],
+    Tcz: [
+      camPosition[2],
+      (x) => setCamPosition([camPosition[0], camPosition[1], x, 1] as any),
+      0,
+      10,
+    ],
+    Rcx: [
+      (camEuler[0] * 180) / Math.PI,
+      (x: any) =>
+        setCamEuler([(x * Math.PI) / 180, camEuler[1], camEuler[2]] as any),
+      ((init_vals.init_cam_euler[0] - 0.2) * 180) / Math.PI,
+      ((init_vals.init_cam_euler[0] + 0.2) * 180) / Math.PI,
+    ],
+    Rcy: [
+      (camEuler[1] * 180) / Math.PI,
+      (x: any) =>
+        setCamEuler([camEuler[0], (x * Math.PI) / 180, camEuler[2]] as any),
+      ((init_vals.init_cam_euler[1] - 0.2) * 180) / Math.PI,
+      ((init_vals.init_cam_euler[1] + 0.2) * 180) / Math.PI,
+    ],
+    Rcz: [
+      (camEuler[2] * 180) / Math.PI,
+      (x: any) =>
+        setCamEuler([camEuler[0], camEuler[1], (x * Math.PI) / 180] as any),
+      ((init_vals.init_cam_euler[2] - 0.2) * 180) / Math.PI,
+      ((init_vals.init_cam_euler[2] + 0.2) * 180) / Math.PI,
+    ],
+    Tx: [
+      getT(camExtrinsics)[0],
+      (x: any) => {
+        setCamPosition(
+          invertTranslation(
+            [x, getT(camExtrinsics)[1], getT(camExtrinsics)[2]],
+            camEuler
+          )
+        );
+      },
+      -5,
+      5,
+    ],
+    Ty: [
+      getT(camExtrinsics)[1],
+      (x: any) => {
+        setCamPosition(
+          invertTranslation(
+            [getT(camExtrinsics)[0], x, getT(camExtrinsics)[2]],
+            camEuler
+          )
+        );
+      },
+      -5,
+      5,
+    ],
+    Tz: [
+      getT(camExtrinsics)[2],
+      (x: any) => {
+        setCamPosition(
+          invertTranslation(
+            [getT(camExtrinsics)[0], getT(camExtrinsics)[1], x],
+            camEuler
+          )
+        );
+      },
+      -15,
+      -5,
+    ],
+    Rx: [
+      (invertEuler(camEuler)[0] * 180) / Math.PI,
+      (x: any) => {
+        setCamEuler(
+          invertEuler([
+            x * (Math.PI / 180),
+            invertEuler(camEuler)[1],
+            invertEuler(camEuler)[2],
+          ])
+        );
+      },
+      -180,
+      180,
+    ],
+    Ry: [
+      (invertEuler(camEuler)[1] * 180) / Math.PI,
+      (x: any) => {
+        setCamEuler(
+          invertEuler([
+            invertEuler(camEuler)[0],
+            x * (Math.PI / 180),
+            invertEuler(camEuler)[2],
+          ])
+        );
+      },
+      -180,
+      180,
+    ],
+    Rz: [
+      (invertEuler(camEuler)[2] * 180) / Math.PI,
+      (x: any) => {
+        setCamEuler(
+          invertEuler([
+            invertEuler(camEuler)[0],
+            invertEuler(camEuler)[1],
+            x * (Math.PI / 180),
+          ])
+        );
+      },
+      -180,
+      180,
+    ],
   };
 
   return (
@@ -160,6 +312,8 @@ const WhatIsACameraMatrix = () => {
           <Grid
             extrinsicMatrix={egoExtrinsics}
             intrinsicMatrix={egoIntrinsics}
+            camCoords={false}
+            camExtrinsicMatrix={camExtrinsics}
           />
           <Cube
             extrinsicMatrix={egoExtrinsics}
@@ -204,6 +358,7 @@ const WhatIsACameraMatrix = () => {
             camExtrinsicMatrix={camExtrinsics}
             camIntrinsicMatrix={camIntrinsics}
             camCoords={true}
+            ord={"y"}
           />
         </Canvas>
       </div>
@@ -233,10 +388,12 @@ const WhatIsACameraMatrix = () => {
                         src={content.url}
                         alt="equation"
                         style={{ height: content.hgt ? content.hgt : "1rem" }}
+                        key={index}
                       />
                     </div>
                   ) : content.type === "slider" ? (
                     <ParamSlider
+                      key={index}
                       value={slider_dict[content.title][0]}
                       min={slider_dict[content.title][2]}
                       max={slider_dict[content.title][3]}
@@ -245,10 +402,28 @@ const WhatIsACameraMatrix = () => {
                         slider_dict[content.title][1](x as number)
                       }
                     />
+                  ) : content.type === "reset" ? (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setCamFocalX(1920);
+                        setCamFocalY(1920);
+                        setCamS(0);
+                        setCamCx(0);
+                        setCamCy(0);
+                        setCamPosition(init_vals.init_cam_position);
+                        setCamEuler(init_vals.init_cam_euler);
+                      }}
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
+                    >
+                      Reset
+                    </button>
                   ) : null;
                 })}
 
-                <h3 className="font-bold mt-2">Scroll for more</h3>
+                <h3 key={idx} className="font-bold mt-2">
+                  Scroll for more
+                </h3>
               </div>
             </div>
           );

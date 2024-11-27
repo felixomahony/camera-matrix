@@ -1,8 +1,8 @@
 import { projectPoints, rotateCamera } from "../../../scripts/rotation";
 import { useEffect, useState } from "react";
 import Line from "./Line";
-import Quadrelateral from "./Quadrelateral";
 import { inv, multiply } from "mathjs";
+import { round } from "mathjs";
 
 export default function DecomposedConnection({
   egoEtrinsicMatrix,
@@ -10,12 +10,14 @@ export default function DecomposedConnection({
   camExtrinsicMatrix,
   camIntrinsicMatrix,
   camCoords = false,
+  ord,
 }: {
   egoEtrinsicMatrix: number[][];
   egoIntrinsicMatrix: number[][];
   camExtrinsicMatrix: number[][];
   camIntrinsicMatrix: number[][];
   camCoords?: boolean;
+  ord: string;
 }) {
   function getGlobalPositions(
     camExtrinsics: number[][],
@@ -31,12 +33,10 @@ export default function DecomposedConnection({
         [0, 0, 0, originPosition[2][0]],
         [1, 1, 1, 1],
       ];
-      console.log("cameraPositions", cameraPositions);
       const globalPositions = multiply(
         inv(camExtrinsics),
         cameraPositions
       ) as any;
-      console.log("globalPositions", globalPositions);
       return globalPositions as number[][];
     } else {
       const cameraPosition = inv(camExtrinsics).map((row) => row[3]);
@@ -64,8 +64,21 @@ export default function DecomposedConnection({
     setProjectedPositions(
       projectPoints(globalPositions, egoEtrinsicMatrix, egoIntrinsicMatrix)
     );
-  }, [camExtrinsicMatrix]);
+  }, [camExtrinsicMatrix, egoEtrinsicMatrix]);
 
+  const [startX, setStartX] = useState<number>(0);
+  const [startY, setStartY] = useState<number>(0);
+  const [endX, setEndX] = useState<number>(0);
+  const [endY, setEndY] = useState<number>(0);
+
+  useEffect(() => {
+    setStartX(projectedPositions[0][1]);
+    setStartY(projectedPositions[1][1]);
+    setEndX(projectedPositions[0][2]);
+    setEndY(projectedPositions[1][2]);
+  });
+
+  console.log("projectedPositions", projectedPositions);
   return (
     <>
       <Line
@@ -76,10 +89,10 @@ export default function DecomposedConnection({
         color="#f00"
       />
       <Line
-        startX={projectedPositions[0][1]}
-        startY={projectedPositions[1][1]}
-        endX={projectedPositions[0][2]}
-        endY={projectedPositions[1][2]}
+        startX={startX}
+        startY={startY}
+        endX={endX}
+        endY={endY}
         color="#0f0"
       />
       <Line

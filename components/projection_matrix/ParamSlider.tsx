@@ -28,7 +28,7 @@ export default function ParamSlider({
         value={value}
         onChange={onChange}
       />
-      <p className="w-[3rem] ml-3">{value}</p>
+      <p className="w-[3rem] ml-3">{Math.round(value)}</p>
     </div>
   );
 }

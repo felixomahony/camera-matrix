@@ -47,7 +47,7 @@ export default function Cube({
     );
     setProjectedCubeVerts(projectedPoints);
     setFaceZOrder(getZOrder(projectedPoints, cubeFaces));
-  }, [intrinsicMatrix, extrinsicMatrix]);
+  }, [intrinsicMatrix, extrinsicMatrix, cubeVerts]);
 
   return (
     <>

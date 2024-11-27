@@ -16,7 +16,7 @@ export default function Camera({
   camIntrinsicMatrix: number[][];
   showPlane?: boolean;
 }) {
-  const getCamWorld = (intrinsics: number[][]) => {
+  const getCamCam = (intrinsics: number[][]) => {
     const focalX = intrinsics[0][0];
     // const focalY = intrinsics[1][1];
     const cx = intrinsics[0][2] / 1000;
@@ -30,34 +30,28 @@ export default function Camera({
     ];
   };
 
-  const [camWorld, setCamWorld] = useState(getCamWorld(camIntrinsicMatrix));
+  const [camCam, setCamCam] = useState(getCamCam(camIntrinsicMatrix));
 
-  const [camCam, setCamCam] = useState<number[][]>(
-    rotateCamera(camExtrinsicMatrix, camWorld)
+  const [camWorld, setCamWorld] = useState<number[][]>(
+    rotateCamera(camExtrinsicMatrix, camCam)
   );
 
   const [camEgo, setCamEgo] = useState<number[][]>(
-    projectPoints(
-      rotateCamera(camExtrinsicMatrix, camWorld),
-      egoEtrinsicMatrix,
-      egoIntrinsicMatrix
-    )
+    projectPoints(camWorld, egoEtrinsicMatrix, egoIntrinsicMatrix)
   );
 
   useEffect(() => {
-    setCamEgo(projectPoints(camCam, egoEtrinsicMatrix, egoIntrinsicMatrix));
+    setCamEgo(projectPoints(camWorld, egoEtrinsicMatrix, egoIntrinsicMatrix));
   }, [egoEtrinsicMatrix, egoIntrinsicMatrix, camWorld]);
 
   useEffect(() => {
-    const cC = rotateCamera(camExtrinsicMatrix, camWorld);
-    setCamCam(cC);
-  }, [camExtrinsicMatrix, camWorld]);
+    const cW = rotateCamera(camExtrinsicMatrix, camCam);
+    setCamWorld(cW);
+  }, [camExtrinsicMatrix, camCam]);
 
   useEffect(() => {
-    setCamWorld(getCamWorld(camIntrinsicMatrix));
+    setCamCam(getCamCam(camIntrinsicMatrix));
   }, [camIntrinsicMatrix]);
-
-  console.log("camEgo", camEgo);
 
   if (camEgo === null) {
     return null;

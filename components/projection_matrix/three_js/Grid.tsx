@@ -1,6 +1,7 @@
 import { projectPoints } from "../../../scripts/rotation";
 import { useEffect, useState } from "react";
 import Line from "./Line";
+import { rotateCamera } from "../../../scripts/rotation";
 
 const gridIdxes: number[] = [
   -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
@@ -47,35 +48,63 @@ const gridColor = "#064e3b";
 export default function Cube({
   extrinsicMatrix,
   intrinsicMatrix,
+  camCoords = false,
+  camExtrinsicMatrix = [[0]],
 }: {
   extrinsicMatrix: number[][];
   intrinsicMatrix: number[][];
+  camCoords?: boolean;
+  camExtrinsicMatrix?: number[][];
 }) {
+  let gridIdxesHorizontalStart_ = gridIdxesHorizontalStart;
+  let gridIdxesHorizontalEnd_ = gridIdxesHorizontalEnd;
+  let gridIdxesVerticalStart_ = gridIdxesVerticalStart;
+  let gridIdxesVerticalEnd_ = gridIdxesVerticalEnd;
+  if (camCoords) {
+    gridIdxesHorizontalStart_ = rotateCamera(
+      camExtrinsicMatrix,
+      gridIdxesHorizontalStart
+    ) as any;
+    gridIdxesHorizontalEnd_ = rotateCamera(
+      camExtrinsicMatrix,
+      gridIdxesHorizontalEnd
+    ) as any;
+    gridIdxesVerticalStart_ = rotateCamera(
+      camExtrinsicMatrix,
+      gridIdxesVerticalStart
+    ) as any;
+    gridIdxesVerticalEnd_ = rotateCamera(
+      camExtrinsicMatrix,
+      gridIdxesVerticalEnd
+    ) as any;
+  } else {
+  }
+
   const [projGHS, setProjGHS] = useState<number[][]>(
-    projectPoints(gridIdxesHorizontalStart, extrinsicMatrix, intrinsicMatrix)
+    projectPoints(gridIdxesHorizontalStart_, extrinsicMatrix, intrinsicMatrix)
   );
   const [projGHE, setProjGHE] = useState<number[][]>(
-    projectPoints(gridIdxesHorizontalEnd, extrinsicMatrix, intrinsicMatrix)
+    projectPoints(gridIdxesHorizontalEnd_, extrinsicMatrix, intrinsicMatrix)
   );
   const [projGVS, setProjGVS] = useState<number[][]>(
-    projectPoints(gridIdxesVerticalStart, extrinsicMatrix, intrinsicMatrix)
+    projectPoints(gridIdxesVerticalStart_, extrinsicMatrix, intrinsicMatrix)
   );
   const [projGVE, setProjGVE] = useState<number[][]>(
-    projectPoints(gridIdxesVerticalEnd, extrinsicMatrix, intrinsicMatrix)
+    projectPoints(gridIdxesVerticalEnd_, extrinsicMatrix, intrinsicMatrix)
   );
 
   useEffect(() => {
     setProjGHS(
-      projectPoints(gridIdxesHorizontalStart, extrinsicMatrix, intrinsicMatrix)
+      projectPoints(gridIdxesHorizontalStart_, extrinsicMatrix, intrinsicMatrix)
     );
     setProjGHE(
-      projectPoints(gridIdxesHorizontalEnd, extrinsicMatrix, intrinsicMatrix)
+      projectPoints(gridIdxesHorizontalEnd_, extrinsicMatrix, intrinsicMatrix)
     );
     setProjGVS(
-      projectPoints(gridIdxesVerticalStart, extrinsicMatrix, intrinsicMatrix)
+      projectPoints(gridIdxesVerticalStart_, extrinsicMatrix, intrinsicMatrix)
     );
     setProjGVE(
-      projectPoints(gridIdxesVerticalEnd, extrinsicMatrix, intrinsicMatrix)
+      projectPoints(gridIdxesVerticalEnd_, extrinsicMatrix, intrinsicMatrix)
     );
   }, [extrinsicMatrix, intrinsicMatrix]);
 

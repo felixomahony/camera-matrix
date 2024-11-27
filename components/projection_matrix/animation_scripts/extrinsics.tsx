@@ -11,24 +11,6 @@ export function get_ego_extrinsics(progress: number): number[][] {
   return ego_extrinsics_page_1(100);
 }
 
-export function get_cam_extrinsics(progress: number): number[][] {
-  const init_cam_position = init_vals["init_cam_position"];
-  const init_cam_rotation = init_vals["init_cam_rotation"];
-
-  const new_inv_extrinsics = init_cam_rotation.map(
-    (row: number[], i: number) => {
-      return row.map((element, j) => {
-        return element + j == 3 ? init_cam_position[i][0] : element;
-      });
-    }
-  );
-
-  console.log("extrinsics", new_inv_extrinsics);
-  const new_extrinsics = inv(new_inv_extrinsics);
-
-  return new_extrinsics as number[][];
-}
-
 function ego_extrinsics_page_1(progress: number): number[][] {
   const max_scale = 3;
   const max_angle = -1.5 * Math.PI;

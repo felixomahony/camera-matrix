@@ -1,4 +1,5 @@
 import { multiply, Matrix, inv } from "mathjs";
+import * as THREE from "three";
 
 export function getCameraPoints(rotationMatrix: number[][]) {
   // rotation matrix is type number[][]
@@ -51,4 +52,50 @@ export function rotateCamera(cameraExtrinsics: number[][], points: number[][]) {
   const invExtrinsics = inv(cameraExtrinsics);
   const camera_rotated: any = multiply(invExtrinsics, points);
   return camera_rotated as number[][];
+}
+
+export function toExtrinsics(
+  roll: number,
+  pitch: number,
+  yaw: number,
+  tx: number,
+  ty: number,
+  tz: number
+): number[][] {
+  const euler = new THREE.Euler(roll, pitch, yaw);
+  const matrix = new THREE.Matrix4().makeRotationFromEuler(euler).transpose();
+  const extrinsics = inv([
+    [matrix.elements[0], matrix.elements[1], matrix.elements[2], tx],
+    [matrix.elements[4], matrix.elements[5], matrix.elements[6], ty],
+    [matrix.elements[8], matrix.elements[9], matrix.elements[10], tz],
+    [0, 0, 0, 1],
+  ]);
+  return extrinsics;
+}
+
+export function getT(extrinsics: number[][]): number[] {
+  return extrinsics.map((row) => row[3]);
+}
+
+export function invertEuler(euler: number[]): number[] {
+  const eulerObj = new THREE.Euler(euler[0], euler[1], euler[2]);
+  const invEulerObj = new THREE.Euler().setFromQuaternion(
+    new THREE.Quaternion().setFromEuler(eulerObj).invert()
+  );
+  return [invEulerObj.x, invEulerObj.y, invEulerObj.z];
+}
+
+export function invertTranslation(
+  translation: number[],
+  euler: number[]
+): number[] {
+  const eulerObj = new THREE.Euler(euler[0], euler[1], euler[2]);
+  const invTranslation = new THREE.Vector3(
+    translation[0],
+    translation[1],
+    translation[2]
+  )
+    .applyEuler(eulerObj)
+    .negate();
+  return [invTranslation.x, invTranslation.y, invTranslation.z];
 }

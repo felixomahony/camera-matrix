@@ -34,7 +34,11 @@
       {
         "type": "text",
         "data": "Let's look more closely at the extrinsic matrix, [R|T]."
-      }
+      },
+      { "type": "slider", "title": "Rx" },
+      { "type": "slider", "title": "Ry" },
+      { "type": "slider", "title": "Rz" },
+      { "type": "reset" }
     ]
   },
   {
@@ -193,10 +197,6 @@
       {
         "type": "text",
         "data": "Mathematically, the intrinsic matrix is given by:"
-      },
-      {
-        "type": "eqn",
-        "url": "/camera_matrix/equations/eqn6.png"
       },
       {
         "type": "text",
