@@ -55,7 +55,7 @@
     "content": [
       {
         "type": "text",
-        "data": "Suppose that we have a point in the world, x, and we wish to know its position in the frame of reference of the camera xₖ. By simple vector addition, the position of the point in camera coordinates is the sum of the position of the origin in the world coordinates oₖ and the vector connecting the origin to the point in the same coordinate frame."
+        "data": "Suppose that we have a point in the world, x, and we wish to know its position in the frame of reference of the camera xₖ. By simple vector addition, the position of the point in camera coordinates is the sum of the position of the origin in the camera coordinates oₖ and the vector connecting the origin to the point in the same coordinate frame."
       },
       {
         "type": "eqn",

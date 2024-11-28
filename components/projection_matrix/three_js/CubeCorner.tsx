@@ -105,7 +105,12 @@ export default function CubeCorner({
         egoIntrinsicMatrix
       )
     );
-  }, [cameraExtrinsics, egoExtrinsicMatrix, egoIntrinsicMatrix]);
+  }, [
+    cameraExtrinsics,
+    egoExtrinsicMatrix,
+    egoIntrinsicMatrix,
+    imagePlaneIntersection,
+  ]);
 
   useEffect(() => {
     setImagePlaneIntersection(
@@ -116,6 +121,10 @@ export default function CubeCorner({
       )
     );
   }, [cameraIntrinsics, cubePointLocation, camPosition]);
+
+  useEffect(() => {
+    setCamPosition(inv(cameraExtrinsics));
+  }, [cameraExtrinsics]);
 
   return (
     <>
