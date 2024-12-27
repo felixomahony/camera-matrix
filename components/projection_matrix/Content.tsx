@@ -184,14 +184,11 @@ export default function Content({
   };
 
   return (
-    <>
+    <div>
       {page_data.map((page: any, idx: number) => {
         return (
-          <div
-            className="h-[100vh] w-[24rem] pl-[1rem] flex items-center justify-center"
-            key={idx}
-          >
-            <div className="bg-[#fff] rounded-md p-4 text-black h-fit">
+          <div className="p-4 h-[100vh]" key={idx}>
+            <div className="bg-[#fff] rounded-md p-4 text-black shadow-md">
               <h2 className="text-2xl font-bold mb">{page.title}</h2>
               {page.content.map((content: any, index: number) => {
                 return content.type === "text" ? (
@@ -245,8 +242,8 @@ export default function Content({
           </div>
         );
       })}
-      <div className="h-[100vh] w-[24rem] relative">
-        <div className="absolute bottom-[1rem] left-[1rem] bg-[#fff] rounded-md p-4 text-black">
+      <div className="w-[24rem] relative overflow-y-scroll">
+        <div className="absolute left-[1rem] bg-[#fff] rounded-md p-4 text-black">
           <h2 className="text-2xl font-bold mb-2">Thanks for scrolling!</h2>
           Hopefully you've learned something about the camera matrix. If you
           enjoyed this, check out my other work at{" "}
@@ -256,6 +253,6 @@ export default function Content({
           .
         </div>
       </div>
-    </>
+    </div>
   );
 }

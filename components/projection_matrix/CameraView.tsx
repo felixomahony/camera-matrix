@@ -15,7 +15,7 @@ export default function CameraView({
   visibility: any;
 }) {
   return (
-    <div className="w-[12rem] h-[9rem] border border-solid border-white bg-black">
+    <div className="w-32 h-24 md:w-48 md:h-36 border border-solid border-white bg-black">
       <Canvas>
         <OrthographicCamera
           makeDefault

@@ -121,26 +121,10 @@ const WhatIsACameraMatrix = () => {
   }, []);
 
   return (
-    <div
-      style={{ position: "relative", width: "100vw", height: "100vh" }}
-      className="bg-teal-950 overflow-scroll"
-    >
-      <div
-        ref={containerRef}
-        className="absolute top-0 left-0 right-0 bottom-0"
-      >
-        <ThirdPartyView
-          visibility={visibility}
-          containerRef={containerRef}
-          egoExtrinsics={egoExtrinsics}
-          egoIntrinsics={egoIntrinsics}
-          camExtrinsics={camExtrinsics}
-          camIntrinsics={camIntrinsics}
-        />
-      </div>
+    <div className="min-h-screen flex flex-col-reverse md:flex-row">
       <div
         ref={scrollableRef}
-        className="relative overflow-y-scroll h-full w-full"
+        className="flex-1 bg-gray-200 md:h-screen md:flex-none md:w-96 overflow-y-scroll max-h-screen"
       >
         <Content
           camFocalX={camFocalX}
@@ -160,12 +144,27 @@ const WhatIsACameraMatrix = () => {
           setCamEuler={setCamEuler}
         />
       </div>
-      <div className="absolute bottom-[1rem] right-[1rem]">
-        <CameraView
-          camExtrinsics={camExtrinsics}
-          camIntrinsics={camIntrinsics}
-          visibility={visibility}
-        />
+      <div className="relative h-[75vw] w-screen md:h-screen md:flex-1 md:w-auto">
+        <div
+          ref={containerRef}
+          className="absolute bottom-0 top-0 left-0 right-0 bg-teal-950"
+        >
+          <ThirdPartyView
+            visibility={visibility}
+            containerRef={containerRef}
+            egoExtrinsics={egoExtrinsics}
+            egoIntrinsics={egoIntrinsics}
+            camExtrinsics={camExtrinsics}
+            camIntrinsics={camIntrinsics}
+          />
+        </div>
+        <div className="absolute bottom-4 right-4">
+          <CameraView
+            camExtrinsics={camExtrinsics}
+            camIntrinsics={camIntrinsics}
+            visibility={visibility}
+          />
+        </div>
       </div>
     </div>
   );
